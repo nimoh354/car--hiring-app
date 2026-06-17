@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Car Hire - Rent Your Dream Car</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🚗 CarHire</div>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#" id="loginBtn">Login</a></li>
+                <li><a href="#" id="registerBtn">Register</a></li>
+                <li><a href="#" id="logoutBtn" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Find Your Perfect Ride</h1>
+        <p>Book the best cars at the best prices</p>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search by brand...">
+            <button onclick="searchCars()">🔍 Search</button>
+        </div>
+        <div class="filters">
+            <select id="fuelFilter" onchange="applyFilters()">
+                <option value="">All Fuel Types</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+            </select>
+            <select id="transmissionFilter" onchange="applyFilters()">
+                <option value="">All Transmissions</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+            </select>
+            <input type="number" id="minPrice" placeholder="Min Price" onchange="applyFilters()">
+            <input type="number" id="maxPrice" placeholder="Max Price" onchange="applyFilters()">
+        </div>
+    </section>
+
+    <section id="cars" class="cars-grid">
+        <!-- Cars will be loaded here -->
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="registerName" placeholder="Full Name" required>
+                <input type="email" id="registerEmail" placeholder="Email" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <input type="tel" id="registerPhone" placeholder="Phone Number">
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('bookingModal')">&times;</span>
+            <h2>📅 Book a Car</h2>
+            <div id="bookingCarInfo"></div>
+            <form id="bookingForm">
+                <label>Pickup Date:</label>
+                <input type="date" id="pickupDate" required>
+                <label>Dropoff Date:</label>
+                <input type="date" id="dropoffDate" required>
+                <div id="bookingTotal"></div>
+                <button type="submit">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/cars.js"></script>
+</body>
+</html>

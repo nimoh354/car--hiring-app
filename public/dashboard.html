@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 My Dashboard - CarHire</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .booking-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .booking-card .status {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .status.pending { background: #ffd93d; color: #333; }
+        .status.confirmed { background: #6bcb77; color: white; }
+        .status.cancelled { background: #ff6b6b; color: white; }
+        .status.completed { background: #4d96ff; color: white; }
+        .btn-cancel {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-cancel:hover { background: #ee5a24; }
+        .btn-back {
+            background: #1a1a2e;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .btn-back:hover { background: #e94560; }
+        .no-bookings {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+        }
+        .no-bookings a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🚗 CarHire</div>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>📊 My Bookings</h1>
+            <a href="/" class="btn-back">← Browse Cars</a>
+        </div>
+        <div id="bookingsList">
+            <p style="text-align:center;">Loading your bookings...</p>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = getCurrentUser();
+            if (!user) {
+                alert('Please login first');
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const bookings = await getMyBookings();
+                const container = document.getElementById('bookingsList');
+                
+                if (bookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-bookings">
+                            <h2>🚗 No bookings yet</h2>
+                            <p>Ready to hit the road? <a href="/">Browse our cars</a> and book your perfect ride!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = bookings.map(b => `
+                    <div class="booking-card">
+                        <div>
+                            <h3>${b.brand} ${b.model}</h3>
+                            <p>📅 ${b.pickup_date} → ${b.dropoff_date}</p>
+                            <p>💰 $${b.total_price} <small>(${b.license_plate})</small></p>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="status ${b.status}">${b.status.toUpperCase()}</span>
+                            <br><br>
+                            ${b.status === 'pending' || b.status === 'confirmed' ? 
+                                `<button class="btn-cancel" onclick="cancelBooking(${b.id})">Cancel</button>` : 
+                                ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('bookingsList').innerHTML = `<p style="color:red;">❌ ${error.message}</p>`;
+            }
+        });
+
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) return;
+            try {
+                await cancelBooking(bookingId);
+                alert('✅ Booking cancelled successfully');
+                location.reload();
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
