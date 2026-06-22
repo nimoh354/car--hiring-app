@@ -1,4 +1,9 @@
-const API_URL = 'http://localhost:5000/api';
+// ============================================
+// API CONFIGURATION
+// ============================================
+
+// Use relative path so it works locally and in production
+const API_URL = '/api';
 
 // Store token
 let authToken = localStorage.getItem('token');
@@ -82,8 +87,6 @@ async function getMyBookings() {
     return apiRequest('/bookings/my-bookings');
 }
 
-// ===== BOOKING FUNCTIONS =====
-
 async function cancelBooking(bookingId) {
     return apiRequest(`/bookings/${bookingId}/cancel`, 'PUT');
 }
@@ -124,22 +127,24 @@ async function getAvailableBookings() {
     return apiRequest('/drivers/available-bookings');
 }
 
-
 async function assignDriver(bookingId, driverId) {
-    console.log(`📡 Assigning driver ${driverId} to booking ${bookingId}`);
     return apiRequest(`/drivers/assign-booking/${bookingId}`, 'PUT', { driver_id: driverId });
 }
 
 async function completeBooking(bookingId) {
     return apiRequest(`/drivers/complete-booking/${bookingId}`, 'PUT');
 }
-// ===== DRIVER MANAGEMENT (ADMIN) =====
 
 async function getDrivers() {
-    console.log('📡 Fetching drivers from API...');
-    const result = await apiRequest('/drivers/all');
-    console.log('📡 API returned:', result);
-    return result;
+    return apiRequest('/drivers/all');
+}
+
+async function updateDriverAvailability(isAvailable) {
+    return apiRequest('/drivers/availability', 'PUT', { is_available: isAvailable });
+}
+
+async function getDriverStatus(driverId) {
+    return apiRequest(`/drivers/status/${driverId}`);
 }
 
 // ===== BOOKING MANAGEMENT (ADMIN) =====
@@ -147,9 +152,8 @@ async function getDrivers() {
 async function updateBookingStatus(bookingId, status) {
     return apiRequest(`/bookings/${bookingId}/status`, 'PUT', { status });
 }
-// ============================================
-// PACKAGE API FUNCTIONS
-// ============================================
+
+// ===== PACKAGE FUNCTIONS =====
 
 async function getPackages() {
     return apiRequest('/packages/packages');
@@ -182,9 +186,7 @@ async function applyOffer(bookingId, offerCode) {
     });
 }
 
-// ============================================
-// REVIEW API FUNCTIONS
-// ============================================
+// ===== REVIEW FUNCTIONS =====
 
 async function createReview(reviewData) {
     return apiRequest('/reviews', 'POST', reviewData);
@@ -205,25 +207,8 @@ async function getUserReviews() {
 async function updateReview(reviewId, reviewData) {
     return apiRequest(`/reviews/${reviewId}`, 'PUT', reviewData);
 }
-// ============================================
-// DRIVER AVAILABILITY
-// ============================================
 
-async function updateDriverAvailability(isAvailable) {
-    return apiRequest('/drivers/availability', 'PUT', { is_available: isAvailable });
-}
-
-// ============================================
-// GET DRIVER STATUS (for main app)
-// ============================================
-
-async function getDriverStatus(driverId) {
-    return apiRequest(`/drivers/status/${driverId}`);
-}
-
-// ============================================
-// ANALYTICS
-// ============================================
+// ===== ANALYTICS =====
 
 async function getAnalytics() {
     return apiRequest('/bookings/analytics');
