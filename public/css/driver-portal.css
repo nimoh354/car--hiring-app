@@ -1,0 +1,540 @@
+/* ============================================
+   DRIVER PORTAL - BLACK & GOLD THEME
+   ============================================ */
+
+:root {
+    --black: #0a0a0a;
+    --dark: #1a1a1a;
+    --dark-card: #222222;
+    --gold: #FFD700;
+    --gold-dark: #C9A800;
+    --gold-light: #FFE44D;
+    --gold-glow: rgba(255, 215, 0, 0.3);
+    --white: #FFFFFF;
+    --gray: #B8B8B8;
+    --light-gray: #888888;
+    --sidebar-width: 250px;
+    --sidebar-collapsed: 70px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 2px solid var(--gold);
+    transition: all 0.3s;
+    overflow: hidden;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed);
+}
+
+.sidebar-brand {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    text-align: center;
+}
+
+.sidebar-brand h2 {
+    color: var(--gold);
+    font-size: 1.5rem;
+}
+
+.sidebar-brand h2 span {
+    color: var(--white);
+}
+
+.sidebar-menu {
+    padding: 1rem 0;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: var(--gray);
+    text-decoration: none;
+    transition: all 0.3s;
+    gap: 1rem;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu a:hover {
+    background: rgba(255, 215, 0, 0.05);
+    color: var(--gold);
+}
+
+.sidebar-menu a.active {
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--gold);
+    border-left-color: var(--gold);
+}
+
+.sidebar-menu a i {
+    font-size: 1.2rem;
+    min-width: 24px;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 0;
+    transition: margin-left 0.3s;
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: var(--sidebar-collapsed);
+}
+
+/* ============================================
+   TOP BAR
+   ============================================ */
+.top-bar {
+    background: var(--dark);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.toggle-btn:hover {
+    color: var(--gold-light);
+}
+
+.driver-info-top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.driver-info-top span {
+    color: var(--white);
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background: rgba(255, 215, 0, 0.2);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+}
+
+.status-badge.unavailable {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+/* ============================================
+   PAGE CONTENT
+   ============================================ */
+.page-content {
+    padding: 2rem;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.page-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-content h1 {
+    color: var(--gold);
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+/* ============================================
+   STATS GRID
+   ============================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--dark-card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: var(--gold);
+}
+
+.stat-card h3 {
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+.stat-card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--gold);
+}
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+.section {
+    background: var(--dark-card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.section h2 {
+    color: var(--gold);
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   RIDE CARDS
+   ============================================ */
+.ride-card {
+    background: var(--black);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    border-left: 3px solid var(--gold);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.ride-card .ride-info {
+    flex: 1;
+}
+
+.ride-card .ride-info h4 {
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+}
+
+.ride-card .ride-info p {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.ride-card .ride-status {
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-assigned {
+    background: rgba(255, 215, 0, 0.2);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+}
+
+.status-completed {
+    background: rgba(0, 255, 0, 0.2);
+    color: #6bcb77;
+    border: 1px solid #6bcb77;
+}
+
+.status-cancelled {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+}
+
+.status-pending {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-accept {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-accept:hover {
+    background: var(--gold-dark);
+    box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.btn-complete {
+    background: #6bcb77;
+    color: var(--black);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-complete:hover {
+    background: #4aad57;
+}
+
+.btn-availability {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+
+.btn-availability:hover {
+    background: var(--gold-dark);
+    box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.btn-availability.unavailable {
+    background: #ff6b6b;
+}
+
+.btn-availability.unavailable:hover {
+    background: #ee5a24;
+}
+
+/* ============================================
+   EARNINGS
+   ============================================ */
+.earnings-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.earnings-card {
+    background: var(--dark-card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.earnings-card h3 {
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+.earnings-card p {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-top: 0.5rem;
+}
+
+/* ============================================
+   PROFILE
+   ============================================ */
+.profile-card {
+    background: var(--dark-card);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    max-width: 600px;
+}
+
+.profile-avatar {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar i {
+    font-size: 5rem;
+    color: var(--gold);
+}
+
+.profile-info p {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+    color: var(--gray);
+}
+
+.profile-info strong {
+    color: var(--white);
+    min-width: 120px;
+    display: inline-block;
+}
+
+.profile-info span {
+    color: var(--gold);
+}
+
+/* ============================================
+   FILTER TABS
+   ============================================ */
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    background: var(--dark);
+    color: var(--gray);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-tab.active {
+    background: var(--gold);
+    color: var(--black);
+    border-color: var(--gold);
+}
+
+.filter-tab:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* ============================================
+   NO DATA
+   ============================================ */
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-collapsed);
+    }
+    
+    .sidebar .sidebar-brand h2 {
+        font-size: 0.9rem;
+    }
+    
+    .sidebar .sidebar-brand h2 span {
+        display: none;
+    }
+    
+    .sidebar-menu a span {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: var(--sidebar-collapsed);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .earnings-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .ride-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .page-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .driver-info-top span {
+        display: none;
+    }
+    
+    .top-bar {
+        padding: 0.8rem 1rem;
+    }
+}

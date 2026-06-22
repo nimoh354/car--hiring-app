@@ -3,13 +3,22 @@ let currentCarId = null;
 // Load cars on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadCars();
+    // Load packages and offers with error handling
+    setTimeout(() => {
+        loadPackages();
+        loadHolidayOffers();
+    }, 100); // Small delay to let cars load first
 });
+
+// ============================================
+// CAR FUNCTIONS
+// ============================================
 
 async function loadCars(filters = {}) {
     const grid = document.querySelector('.cars-grid');
     if (!grid) return;
     
-    grid.innerHTML = '<div class="loading">Loading cars</div>';
+    grid.innerHTML = '<div class="loading">Loading cars...</div>';
 
     try {
         const cars = await getCars(filters);
@@ -24,55 +33,53 @@ async function loadCars(filters = {}) {
             return;
         }
 
-        grid.innerHTML = cars.map(car => `
-            <div class="car-card">
-                <img src="${car.image_url || 'https://via.placeholder.com/400x200?text=Car'}" 
-                     alt="${car.brand} ${car.model}"
-                     onerror="this.src='https://via.placeholder.com/400x200?text=🚗'">
-                <div class="details">
-                    <h3>${car.brand} ${car.model} (${car.year})</h3>
-                    <div class="price">$${car.price_per_day}/day</div>
-                    <div class="specs">
-                        <span>⛽ ${car.fuel_type}</span>
-                        <span>⚙️ ${car.transmission}</span>
-                        <span>👥 ${car.seats} seats</span>
-                        <span>${car.is_available ? '✅ Available' : '❌ Booked'}</span>
+        grid.innerHTML = cars.map(car => {
+            // Generate star rating
+            const rating = car.avg_rating || 0;
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+            const emptyStars = 5 - fullStars - halfStar;
+            
+            let starsHTML = '';
+            for (let i = 0; i < fullStars; i++) starsHTML += '⭐';
+            if (halfStar) starsHTML += '⭐';
+            for (let i = 0; i < emptyStars; i++) starsHTML += '☆';
+            
+            return `
+                <div class="car-card">
+                    <img src="${car.image_url || 'https://via.placeholder.com/400x200?text=Car'}" 
+                         alt="${car.brand} ${car.model}"
+                         onerror="this.src='https://via.placeholder.com/400x200?text=🚗'">
+                    <div class="details">
+                        <h3>${car.brand} ${car.model} (${car.year})</h3>
+                        <div class="price">$${car.price_per_day}/day</div>
+                        <div class="rating">
+                            <span>${starsHTML}</span>
+                            <span style="color: #FFD700; font-weight: bold;">${rating.toFixed(1)}</span>
+                            <span style="color: #666; font-size: 0.8rem;">(${car.review_count || 0} reviews)</span>
+                        </div>
+                        <div class="specs">
+                            <span>⛽ ${car.fuel_type}</span>
+                            <span>⚙️ ${car.transmission}</span>
+                            <span>👥 ${car.seats} seats</span>
+                            <span>${car.is_available ? '✅ Available' : '❌ Booked'}</span>
+                        </div>
+                        <button onclick="openBookingModal(${car.id}, '${car.brand} ${car.model}', ${car.price_per_day})" 
+                                ${!car.is_available ? 'disabled' : ''}>
+                            ${car.is_available ? '🚗 Book Now' : 'Not Available'}
+                        </button>
                     </div>
-                    <button onclick="openBookingModal(${car.id}, '${car.brand} ${car.model}', ${car.price_per_day})" 
-                            ${!car.is_available ? 'disabled' : ''}>
-                        ${car.is_available ? '🚗 Book Now' : 'Not Available'}
-                    </button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (error) {
         grid.innerHTML = `<p style="color:red;text-align:center;">❌ Error loading cars: ${error.message}</p>`;
     }
 }
 
-// Search function
-function searchCars() {
-    const query = document.getElementById('searchInput').value;
-    applyFilters();
-}
-
-// Apply all filters
-function applyFilters() {
-    const brand = document.getElementById('searchInput').value;
-    const fuel = document.getElementById('fuelFilter').value;
-    const transmission = document.getElementById('transmissionFilter').value;
-    const minPrice = document.getElementById('minPrice').value;
-    const maxPrice = document.getElementById('maxPrice').value;
-
-    const filters = {};
-    if (brand) filters.brand = brand;
-    if (fuel) filters.fuel_type = fuel;
-    if (transmission) filters.transmission = transmission;
-    if (minPrice) filters.minPrice = minPrice;
-    if (maxPrice) filters.maxPrice = maxPrice;
-
-    loadCars(filters);
-}
+// ============================================
+// BOOKING FUNCTIONS
+// ============================================
 
 // Open booking modal
 function openBookingModal(carId, carName, pricePerDay) {
@@ -154,5 +161,121 @@ function calculateTotal() {
         } else {
             totalDiv.textContent = '⚠️ Dropoff must be after pickup';
         }
+    }
+}
+
+// ============================================
+// HOLIDAY OFFERS (with timeout)
+// ============================================
+async function loadHolidayOffers() {
+    try {
+        const container = document.getElementById('holidayOffers');
+        if (!container) return;
+        
+        // Set a timeout for the API call
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 3000)
+        );
+        
+        const offersPromise = getHolidayOffers();
+        const offers = await Promise.race([offersPromise, timeoutPromise]);
+        
+        if (!offers || offers.length === 0) {
+            container.innerHTML = '<p style="grid-column:1/-1;color:#fff;">No active offers at the moment. Check back soon! 🎁</p>';
+            return;
+        }
+        
+        container.innerHTML = offers.map(offer => `
+            <div class="offer-card">
+                <h3>🎁 ${offer.name}</h3>
+                <p>${offer.description}</p>
+                <div class="discount">${offer.discount_percentage}% OFF</div>
+                <div class="code">Code: ${offer.code}</div>
+                <small>Valid until ${offer.end_date}</small>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading offers:', error);
+        const container = document.getElementById('holidayOffers');
+        if (container) {
+            container.innerHTML = '<p style="grid-column:1/-1;color:#fff;">⚠️ Offers temporarily unavailable.</p>';
+        }
+    }
+}
+
+// ============================================
+// CAR PACKAGES (with timeout)
+// ============================================
+async function loadPackages() {
+    try {
+        const container = document.getElementById('packagesGrid');
+        if (!container) return;
+        
+        // Set a timeout for the API call
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 3000)
+        );
+        
+        const packagesPromise = getPackages();
+        const packages = await Promise.race([packagesPromise, timeoutPromise]);
+        
+        if (!packages || packages.length === 0) {
+            container.innerHTML = '<div class="loading-text">No packages available.</div>';
+            return;
+        }
+        
+        container.innerHTML = packages.map(pkg => {
+            const services = [];
+            if (pkg.includes_gps) services.push('🗺️ GPS');
+            if (pkg.includes_insurance) services.push('🛡️ Insurance');
+            if (pkg.includes_child_seat) services.push('👶 Child Seat');
+            
+            return `
+                <div class="package-card">
+                    <span class="package-badge">⭐ Package</span>
+                    <h3>${pkg.name}</h3>
+                    <p>${pkg.description || ''}</p>
+                    <div class="price">$${pkg.base_price}/day</div>
+                    ${pkg.discount_percentage > 0 ? `<span class="discount-badge">${pkg.discount_percentage}% OFF</span>` : ''}
+                    <div class="services">
+                        ${services.length > 0 ? services.map(s => `<span>${s}</span>`).join('') : '<span>Standard Package</span>'}
+                    </div>
+                    <div class="car-info">🚗 ${pkg.brand} ${pkg.model}</div>
+                    <button class="book-btn" onclick="bookPackage(${pkg.id})">Book Now</button>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading packages:', error);
+        const container = document.getElementById('packagesGrid');
+        if (container) {
+            container.innerHTML = '<div class="loading-text">⚠️ Packages temporarily unavailable.</div>';
+        }
+    }
+}
+
+// ============================================
+// BOOK PACKAGE
+// ============================================
+async function bookPackage(packageId) {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('Please login to book a package');
+        document.getElementById('loginModal').style.display = 'flex';
+        return;
+    }
+    
+    try {
+        const pkg = await getPackageById(packageId);
+        const services = [];
+        if (pkg.includes_gps) services.push('✅ GPS');
+        if (pkg.includes_insurance) services.push('✅ Insurance');
+        if (pkg.includes_child_seat) services.push('✅ Child Seat');
+        
+        alert(`📦 Package: ${pkg.name}\n🚗 ${pkg.brand} ${pkg.model}\n💰 $${pkg.base_price}/day\n\n📋 Includes:\n${services.join('\n')}\n\nPlease select dates to continue.`);
+        // Redirect to booking page with package
+        window.location.href = `/book-package?packageId=${packageId}`;
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
     }
 }

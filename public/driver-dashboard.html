@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Driver Dashboard - CarHire</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .driver-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .driver-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .driver-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+        .stat-card .available {
+            color: #6bcb77;
+        }
+        .stat-card .unavailable {
+            color: #ff6b6b;
+        }
+        .driver-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .driver-section h2 {
+            margin-bottom: 1.5rem;
+            color: #1a1a2e;
+        }
+        .booking-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+        .booking-card:last-child {
+            border-bottom: none;
+        }
+        .booking-card .info {
+            flex: 1;
+        }
+        .booking-card .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .status {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status.pending { background: #ffd93d; color: #333; }
+        .status.confirmed { background: #6bcb77; color: white; }
+        .status.assigned { background: #4d96ff; color: white; }
+        .status.cancelled { background: #ff6b6b; color: white; }
+        .status.completed { background: #1a1a2e; color: white; }
+        .btn-available {
+            background: #6bcb77;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-available:hover {
+            background: #4aad57;
+        }
+        .btn-available.off {
+            background: #ff6b6b;
+        }
+        .btn-available.off:hover {
+            background: #ee5a24;
+        }
+        .btn-assign {
+            background: #4d96ff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-assign:hover {
+            background: #3a7ad9;
+        }
+        .btn-complete {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-complete:hover {
+            background: #e94560;
+        }
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        .driver-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .driver-info h3 {
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+        }
+        .driver-info p {
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            .driver-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .booking-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .booking-card .actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🚗 Driver Portal</div>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/driver-dashboard">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="driver-container">
+        <div class="driver-header">
+            <h1>🚗 Driver Dashboard</h1>
+            <button id="availabilityBtn" class="btn-available">🟢 Available</button>
+        </div>
+
+        <!-- Driver Info -->
+        <div class="driver-info">
+            <h3 id="driverName">Driver Name</h3>
+            <p id="driverEmail">driver@email.com</p>
+            <p id="driverLicense">License: N/A</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="driver-stats">
+            <div class="stat-card">
+                <h3>📊 Total Trips</h3>
+                <p id="totalTrips">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>💰 Earnings</h3>
+                <p id="earnings">$0</p>
+            </div>
+            <div class="stat-card">
+                <h3>⭐ Rating</h3>
+                <p id="rating">0.0</p>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Status</h3>
+                <p id="availabilityStatus" class="available">🟢 Available</p>
+            </div>
+        </div>
+
+        <!-- My Bookings -->
+        <div class="driver-section">
+            <h2>📅 My Bookings</h2>
+            <div id="driverBookings">
+                <div class="no-data">Loading your bookings...</div>
+            </div>
+        </div>
+
+        <!-- Available Bookings -->
+        <div class="driver-section">
+            <h2>🚗 Available Bookings</h2>
+            <div id="availableBookings">
+                <div class="no-data">Loading available bookings...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/driver.js"></script>
+</body>
+</html>

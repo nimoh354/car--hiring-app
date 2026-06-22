@@ -16,13 +16,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
         .booking-card {
-            background: white;
+            background: var(--dark-card, #1a1a1a);
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -31,13 +32,14 @@
         .booking-card .status {
             padding: 0.3rem 1rem;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: bold;
         }
         .status.pending { background: #ffd93d; color: #333; }
         .status.confirmed { background: #6bcb77; color: white; }
+        .status.assigned { background: #4d96ff; color: white; }
         .status.cancelled { background: #ff6b6b; color: white; }
-        .status.completed { background: #4d96ff; color: white; }
+        .status.completed { background: #1a1a2e; color: white; }
         .btn-cancel {
             background: #ff6b6b;
             color: white;
@@ -46,26 +48,61 @@
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s;
         }
-        .btn-cancel:hover { background: #ee5a24; }
+        .btn-cancel:hover {
+            background: #ee5a24;
+        }
         .btn-back {
-            background: #1a1a2e;
-            color: white;
+            background: var(--gold, #FFD700);
+            color: var(--black, #0a0a0a);
             padding: 0.5rem 1.5rem;
             border-radius: 5px;
             text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
         }
-        .btn-back:hover { background: #e94560; }
+        .btn-back:hover {
+            background: var(--gold-dark, #C9A800);
+        }
+        .btn-pay-now {
+    background: #FFD700;
+    color: #0a0a0a;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+}
+.btn-pay-now:hover {
+    background: #C9A800;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
         .no-bookings {
             text-align: center;
             padding: 3rem;
-            background: white;
+            background: var(--dark-card, #1a1a1a);
             border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
         }
         .no-bookings a {
-            color: #e94560;
+            color: var(--gold, #FFD700);
             text-decoration: none;
             font-weight: bold;
+        }
+        .booking-info h4 {
+            color: var(--gold, #FFD700);
+        }
+        .booking-info p {
+            color: var(--gray, #B8B8B8);
+        }
+        .booking-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -92,61 +129,106 @@
     </div>
 
     <script src="/js/api.js"></script>
-    <script src="/js/auth.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = getCurrentUser();
-            if (!user) {
-                alert('Please login first');
+<script src="/js/auth.js"></script>
+<script>
+    console.log('🔍 Dashboard loaded');
+
+    // ============================================
+    // CANCEL BOOKING - GLOBAL FUNCTION
+    // ============================================
+    // Make this function global so onclick can find it
+    window.cancelBooking = async function(bookingId) {
+        console.log('🔍 Cancel button clicked for booking:', bookingId);
+        
+        if (!confirm('Are you sure you want to cancel this booking?')) {
+            console.log('❌ User cancelled the action');
+            return;
+        }
+        
+        try {
+            console.log('📡 Sending cancel request to API...');
+            const result = await cancelBooking(bookingId);
+            console.log('✅ Cancel API response:', result);
+            alert('✅ Booking cancelled successfully!');
+            await loadDashboard();
+        } catch (error) {
+            console.error('❌ Error cancelling:', error);
+            alert('❌ Error: ' + error.message);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('🔍 DOM loaded');
+        
+        const user = getCurrentUser();
+        console.log('🔍 Current user:', user);
+        
+        if (!user) {
+            alert('Please login first');
+            window.location.href = '/';
+            return;
+        }
+
+        // Set logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.onclick = () => {
+                logoutUser();
                 window.location.href = '/';
+            };
+        }
+
+        await loadDashboard();
+    });
+
+    // ============================================
+    // LOAD DASHBOARD
+    // ============================================
+    async function loadDashboard() {
+        console.log('🔄 Loading dashboard...');
+        try {
+            const bookings = await getMyBookings();
+            console.log('📊 Bookings received:', bookings);
+            
+            const container = document.getElementById('bookingsList');
+            
+            if (!bookings || bookings.length === 0) {
+                container.innerHTML = `
+                    <div class="no-bookings">
+                        <h2>🚗 No bookings yet</h2>
+                        <p>Ready to hit the road? <a href="/">Browse our cars</a> and book your perfect ride!</p>
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                const bookings = await getMyBookings();
-                const container = document.getElementById('bookingsList');
-                
-                if (bookings.length === 0) {
-                    container.innerHTML = `
-                        <div class="no-bookings">
-                            <h2>🚗 No bookings yet</h2>
-                            <p>Ready to hit the road? <a href="/">Browse our cars</a> and book your perfect ride!</p>
-                        </div>
-                    `;
-                    return;
-                }
+            console.log(`✅ Displaying ${bookings.length} bookings`);
 
-                container.innerHTML = bookings.map(b => `
-                    <div class="booking-card">
-                        <div>
-                            <h3>${b.brand} ${b.model}</h3>
+            container.innerHTML = bookings.map(b => {
+                console.log(`📋 Booking #${b.id}: status=${b.status}`);
+                return `
+                    <div class="booking-card" id="booking-${b.id}">
+                        <div class="booking-info">
+                            <h4>${b.brand} ${b.model}</h4>
                             <p>📅 ${b.pickup_date} → ${b.dropoff_date}</p>
                             <p>💰 $${b.total_price} <small>(${b.license_plate})</small></p>
                         </div>
                         <div style="text-align:right;">
                             <span class="status ${b.status}">${b.status.toUpperCase()}</span>
                             <br><br>
-                            ${b.status === 'pending' || b.status === 'confirmed' ? 
-                                `<button class="btn-cancel" onclick="cancelBooking(${b.id})">Cancel</button>` : 
-                                ''}
+                           ${b.status === 'pending' || b.status === 'confirmed' ? 
+    `<button class="btn-cancel" onclick="window.cancelBooking(${b.id})">❌ Cancel</button>
+     <a href="/payment?bookingId=${b.id}" class="btn-pay-now">💳 Pay Now</a>` : 
+    ''}
                         </div>
                     </div>
-                `).join('');
-            } catch (error) {
-                document.getElementById('bookingsList').innerHTML = `<p style="color:red;">❌ ${error.message}</p>`;
-            }
-        });
-
-        async function cancelBooking(bookingId) {
-            if (!confirm('Are you sure you want to cancel this booking?')) return;
-            try {
-                await cancelBooking(bookingId);
-                alert('✅ Booking cancelled successfully');
-                location.reload();
-            } catch (error) {
-                alert('❌ ' + error.message);
-            }
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('❌ Error loading dashboard:', error);
+            document.getElementById('bookingsList').innerHTML = `<p style="color:red;">❌ Error: ${error.message}</p>`;
         }
-    </script>
+    }
+</script>
 </body>
 </html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Driver Portal - CarHire</title>
+    <link rel="stylesheet" href="/css/driver-portal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2>🚗 Driver<span>Portal</span></h2>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" class="active" data-page="dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="#" data-page="my-rides">
+                <i class="fas fa-car"></i> My Rides
+            </a>
+            <a href="#" data-page="earnings">
+                <i class="fas fa-wallet"></i> Earnings
+            </a>
+            <a href="#" data-page="available">
+                <i class="fas fa-calendar-check"></i> Available Bookings
+            </a>
+            <a href="#" data-page="profile">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="#" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <button id="toggleSidebar" class="toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="driver-info-top">
+                <span id="driverNameTop">Driver</span>
+                <div class="status-badge" id="statusBadge">
+                    <i class="fas fa-circle"></i> Available
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page-content active">
+            <h1>📊 Dashboard</h1>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <div>
+                        <h3>Total Trips</h3>
+                        <p id="totalTrips">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet"></i>
+                    <div>
+                        <h3>Earnings</h3>
+                        <p id="totalEarnings">$0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <h3>Rating</h3>
+                        <p id="driverRating">0.0 ⭐</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-car"></i>
+                    <div>
+                        <h3>Available Bookings</h3>
+                        <p id="availableCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📅 Recent Rides</h2>
+                <div id="recentRides">
+                    <p class="no-data">No rides yet. Accept a booking to get started!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Rides Page -->
+        <div id="page-my-rides" class="page-content">
+            <h1>🚗 My Rides</h1>
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-status="all">All</button>
+                <button class="filter-tab" data-status="assigned">Assigned</button>
+                <button class="filter-tab" data-status="completed">Completed</button>
+                <button class="filter-tab" data-status="cancelled">Cancelled</button>
+            </div>
+            <div id="myRidesList">
+                <p class="no-data">No rides found.</p>
+            </div>
+        </div>
+
+        <!-- Earnings Page -->
+        <div id="page-earnings" class="page-content">
+            <h1>💰 Earnings</h1>
+            <div class="earnings-summary">
+                <div class="earnings-card">
+                    <h3>Total Earnings</h3>
+                    <p id="totalEarningsPage">$0</p>
+                </div>
+                <div class="earnings-card">
+                    <h3>This Month</h3>
+                    <p id="monthEarnings">$0</p>
+                </div>
+                <div class="earnings-card">
+                    <h3>Total Trips</h3>
+                    <p id="totalTripsPage">0</p>
+                </div>
+            </div>
+            <div id="earningsHistory">
+                <p class="no-data">No earnings yet.</p>
+            </div>
+        </div>
+
+        <!-- Available Bookings Page -->
+        <div id="page-available" class="page-content">
+            <h1>📋 Available Bookings</h1>
+            <div id="availableBookingsList">
+                <p class="no-data">No available bookings.</p>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="page-profile" class="page-content">
+            <h1>👤 My Profile</h1>
+            <div class="profile-card">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <p><strong>Name:</strong> <span id="profileName">-</span></p>
+                    <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+                    <p><strong>License:</strong> <span id="profileLicense">-</span></p>
+                    <p><strong>Phone:</strong> <span id="profilePhone">-</span></p>
+                    <p><strong>Address:</strong> <span id="profileAddress">-</span></p>
+                    <p><strong>Member Since:</strong> <span id="profileJoined">-</span></p>
+                </div>
+                <button id="toggleAvailabilityBtn" class="btn-availability">🟢 Available</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/driver-portal.js"></script>
+</body>
+</html>

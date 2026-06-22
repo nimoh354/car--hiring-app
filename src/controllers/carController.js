@@ -1,5 +1,8 @@
 const db = require('../config/db');
 
+// ============================================
+// GET ALL CARS
+// ============================================
 exports.getAllCars = async (req, res) => {
     try {
         const { available, brand, minPrice, maxPrice } = req.query;
@@ -29,18 +32,26 @@ exports.getAllCars = async (req, res) => {
     }
 };
 
+// ============================================
+// GET CAR BY ID
+// ============================================
 exports.getCarById = async (req, res) => {
     try {
         const [cars] = await db.query('SELECT * FROM cars WHERE id = ?', [req.params.id]);
+        
         if (cars.length === 0) {
             return res.status(404).json({ error: 'Car not found' });
         }
+        
         res.json(cars[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// ============================================
+// ADD CAR (ADMIN)
+// ============================================
 exports.addCar = async (req, res) => {
     try {
         const { brand, model, year, license_plate, price_per_day, fuel_type, transmission, seats, image_url } = req.body;
@@ -57,6 +68,9 @@ exports.addCar = async (req, res) => {
     }
 };
 
+// ============================================
+// UPDATE CAR (ADMIN)
+// ============================================
 exports.updateCar = async (req, res) => {
     try {
         const { brand, model, year, license_plate, price_per_day, fuel_type, transmission, seats, image_url, is_available } = req.body;
@@ -73,6 +87,9 @@ exports.updateCar = async (req, res) => {
     }
 };
 
+// ============================================
+// DELETE CAR (ADMIN)
+// ============================================
 exports.deleteCar = async (req, res) => {
     try {
         await db.query('DELETE FROM cars WHERE id = ?', [req.params.id]);

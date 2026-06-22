@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💳 Payment - CarHire</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .payment-container {
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #1a1a1a;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .payment-container h1 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .payment-summary {
+            background: #0a0a0a;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        .payment-summary p {
+            color: #B8B8B8;
+            margin: 0.3rem 0;
+        }
+        .payment-summary .amount {
+            font-size: 2rem;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            color: #B8B8B8;
+            margin-bottom: 0.3rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #FFFFFF;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #FFD700;
+        }
+        .btn-pay {
+            width: 100%;
+            padding: 1rem;
+            background: #FFD700;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-pay:hover {
+            background: #C9A800;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        .btn-pay:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .status-msg {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .status-msg.success {
+            display: block;
+            background: rgba(107, 203, 119, 0.15);
+            color: #6bcb77;
+            border: 1px solid #6bcb77;
+        }
+        .status-msg.error {
+            display: block;
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+        .status-msg.info {
+            display: block;
+            background: rgba(77, 150, 255, 0.15);
+            color: #4d96ff;
+            border: 1px solid #4d96ff;
+        }
+        .status-msg.pending {
+            display: block;
+            background: rgba(255, 215, 0, 0.15);
+            color: #FFD700;
+            border: 1px solid #FFD700;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-link a {
+            color: #B8B8B8;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            color: #FFD700;
+        }
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #0a0a0a;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🚗 CarHire</div>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="payment-container">
+        <h1>💳 Complete Payment</h1>
+        
+        <div id="statusMsg" class="status-msg"></div>
+        
+        <div class="payment-summary" id="paymentSummary">
+            <p><strong>Booking ID:</strong> #<span id="bookingId">-</span></p>
+            <p><strong>Car:</strong> <span id="carName">-</span></p>
+            <p><strong>Dates:</strong> <span id="bookingDates">-</span></p>
+            <p class="amount">Total: $<span id="totalAmount">0</span></p>
+        </div>
+
+        <form id="paymentForm">
+            <div class="form-group">
+                <label>📱 M-Pesa Phone Number</label>
+                <input type="tel" id="phone" placeholder="0712345678" required>
+                <small style="color: #B8B8B8;">Enter your Safaricom phone number</small>
+            </div>
+            <button type="submit" class="btn-pay" id="payBtn">
+                🔑 Pay with M-Pesa
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="/dashboard">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let bookingData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = getCurrentUser();
+            if (!user) {
+                alert('Please login first');
+                window.location.href = '/';
+                return;
+            }
+
+            // Set logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = () => {
+                    logoutUser();
+                    window.location.href = '/';
+                };
+            }
+
+            // Get booking ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('bookingId');
+
+            if (!bookingId) {
+                alert('No booking selected for payment');
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            await loadBooking(bookingId);
+
+            // Setup form
+            const form = document.getElementById('paymentForm');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                await initiatePayment(bookingId);
+            };
+        });
+
+        async function loadBooking(bookingId) {
+            try {
+                const bookings = await getMyBookings();
+                const booking = bookings.find(b => b.id == bookingId);
+
+                if (!booking) {
+                    alert('Booking not found');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+
+                bookingData = booking;
+
+                document.getElementById('bookingId').textContent = booking.id;
+                document.getElementById('carName').textContent = `${booking.brand} ${booking.model}`;
+                document.getElementById('bookingDates').textContent = `${booking.pickup_date} → ${booking.dropoff_date}`;
+                document.getElementById('totalAmount').textContent = booking.total_price;
+
+            } catch (error) {
+                alert('Error loading booking: ' + error.message);
+            }
+        }
+
+        async function initiatePayment(bookingId) {
+            const phone = document.getElementById('phone').value.trim();
+            const payBtn = document.getElementById('payBtn');
+            const statusMsg = document.getElementById('statusMsg');
+
+            // Validate phone
+            if (!phone || phone.length < 10) {
+                showStatus('Please enter a valid phone number (e.g., 0712345678)', 'error');
+                return;
+            }
+
+            if (!phone.match(/^(07|01)\d{8}$/)) {
+                showStatus('Please enter a valid Safaricom phone number (e.g., 0712345678)', 'error');
+                return;
+            }
+
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<span class="loader"></span> Processing...';
+
+            try {
+                const response = await apiRequest('/payments/initiate', 'POST', {
+                    booking_id: parseInt(bookingId),
+                    phone: phone,
+                    amount: bookingData.total_price
+                });
+
+                console.log('Payment initiated:', response);
+                showStatus(`📱 ${response.mpesa_message || 'Payment initiated! Check your phone.'}`, 'pending');
+
+                let countdown = 5;
+                showStatus(`⏳ Waiting for M-Pesa confirmation... ${countdown}s`, 'pending');
+
+                const interval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        showStatus(`⏳ Waiting for M-Pesa confirmation... ${countdown}s`, 'pending');
+                    }
+                }, 1000);
+
+                setTimeout(async () => {
+                    clearInterval(interval);
+                    
+                    try {
+                        const confirmResult = await apiRequest('/payments/confirm', 'POST', {
+                            transaction_id: response.transaction_id,
+                            status: 'completed'
+                        });
+
+                        console.log('Payment confirmed:', confirmResult);
+                        showStatus('✅ Payment confirmed successfully! 🎉 Your booking is now confirmed.', 'success');
+                        
+                        payBtn.innerHTML = '✅ Payment Complete';
+                        
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 2500);
+
+                    } catch (error) {
+                        console.error('Confirmation error:', error);
+                        showStatus('❌ Payment confirmation failed. Please try again.', 'error');
+                        payBtn.disabled = false;
+                        payBtn.innerHTML = '🔑 Pay with M-Pesa';
+                    }
+                }, 6500);
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showStatus('❌ Payment failed: ' + error.message, 'error');
+                payBtn.disabled = false;
+                payBtn.innerHTML = '🔑 Pay with M-Pesa';
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.textContent = message;
+            statusMsg.className = `status-msg ${type}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Book Package - CarHire</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .book-package-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: var(--dark-card, #1a1a1a);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+        }
+        .book-package-container h1 {
+            color: var(--gold, #FFD700);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .package-details {
+            background: var(--black, #0a0a0a);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        .package-details h2 {
+            color: var(--gold, #FFD700);
+            margin-bottom: 0.5rem;
+        }
+        .package-details p {
+            color: var(--gray, #B8B8B8);
+            margin: 0.3rem 0;
+        }
+        .package-details .price {
+            font-size: 1.5rem;
+            color: var(--gold, #FFD700);
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            color: var(--gray, #B8B8B8);
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            background: var(--black, #0a0a0a);
+            color: var(--white, #FFFFFF);
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold, #FFD700);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+        }
+        .form-group .offer-info {
+            color: var(--gold, #FFD700);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        .total-price {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--gold, #FFD700);
+        }
+        .total-price h3 {
+            color: var(--gray, #B8B8B8);
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+        .total-price .amount {
+            font-size: 2rem;
+            color: var(--gold, #FFD700);
+            font-weight: bold;
+        }
+        .btn-book {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gold, #FFD700);
+            color: var(--black, #0a0a0a);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-book:hover {
+            background: var(--gold-dark, #C9A800);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            transform: scale(1.02);
+        }
+        .btn-back {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--gray, #B8B8B8);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .btn-back:hover {
+            color: var(--gold, #FFD700);
+        }
+        .error-msg {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff6b6b;
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 1rem;
+            border: 1px solid #ff6b6b;
+        }
+        .loading {
+            text-align: center;
+            color: var(--gray, #B8B8B8);
+            padding: 2rem;
+        }
+        .services-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0;
+        }
+        .services-list span {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold, #FFD700);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        @media (max-width: 480px) {
+            .book-package-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🚗 CarHire</div>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="book-package-container">
+        <h1>📦 Book a Package</h1>
+        
+        <div id="errorMsg" class="error-msg"></div>
+        <div id="loadingMsg" class="loading">Loading package details...</div>
+
+        <div id="packageContent" style="display:none;">
+            <div class="package-details" id="packageDetails">
+                <!-- Package details loaded by JS -->
+            </div>
+
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label>📅 Pickup Date</label>
+                    <input type="date" id="pickupDate" required>
+                </div>
+                <div class="form-group">
+                    <label>📅 Dropoff Date</label>
+                    <input type="date" id="dropoffDate" required>
+                </div>
+                <div class="form-group">
+                    <label>🎫 Holiday Offer Code (Optional)</label>
+                    <input type="text" id="offerCode" placeholder="e.g. XMAS2026">
+                    <div class="offer-info">💡 Enter a valid offer code for extra discount!</div>
+                </div>
+
+                <div id="totalPriceDisplay" class="total-price">
+                    <h3>Total Price</h3>
+                    <div class="amount" id="totalAmount">$0.00</div>
+                    <div id="discountInfo" style="color: #6bcb77; font-size: 0.9rem; margin-top: 0.3rem;"></div>
+                </div>
+
+                <button type="submit" class="btn-book">✅ Confirm Booking</button>
+            </form>
+
+            <a href="/" class="btn-back">← Back to Home</a>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let packageData = null;
+        let currentCarId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is logged in
+            const user = getCurrentUser();
+            if (!user) {
+                alert('Please login to book a package');
+                window.location.href = '/';
+                return;
+            }
+
+            // Get package ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const packageId = urlParams.get('packageId');
+
+            if (!packageId) {
+                alert('No package selected');
+                window.location.href = '/';
+                return;
+            }
+
+            // Load package details
+            await loadPackage(packageId);
+
+            // Setup logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = () => {
+                    logoutUser();
+                    window.location.href = '/';
+                };
+            }
+
+            // Setup form
+            const form = document.getElementById('bookingForm');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                await bookPackage();
+            };
+
+            // Calculate total on date change
+            document.getElementById('pickupDate').onchange = calculateTotal;
+            document.getElementById('dropoffDate').onchange = calculateTotal;
+            document.getElementById('offerCode').oninput = calculateTotal;
+        });
+
+        async function loadPackage(packageId) {
+            try {
+                const loading = document.getElementById('loadingMsg');
+                const content = document.getElementById('packageContent');
+                const errorMsg = document.getElementById('errorMsg');
+
+                const pkg = await getPackageById(packageId);
+                packageData = pkg;
+                currentCarId = pkg.car_id;
+
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+                const services = [];
+                if (pkg.includes_gps) services.push('🗺️ GPS');
+                if (pkg.includes_insurance) services.push('🛡️ Insurance');
+                if (pkg.includes_child_seat) services.push('👶 Child Seat');
+
+                document.getElementById('packageDetails').innerHTML = `
+                    <h2>${pkg.name}</h2>
+                    <p>${pkg.description || 'Premium package for your journey'}</p>
+                    <div class="services-list">
+                        ${services.map(s => `<span>${s}</span>`).join('')}
+                    </div>
+                    <p class="price">$${pkg.base_price}/day</p>
+                    <p style="color: var(--gray, #B8B8B8); font-size: 0.9rem;">
+                        🚗 ${pkg.brand} ${pkg.model} (${pkg.year})
+                    </p>
+                    ${pkg.discount_percentage > 0 ? `<p style="color: #6bcb77;">🎉 ${pkg.discount_percentage}% package discount applied!</p>` : ''}
+                `;
+
+                // Set min date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('pickupDate').min = today;
+                document.getElementById('dropoffDate').min = today;
+
+                calculateTotal();
+
+            } catch (error) {
+                document.getElementById('loadingMsg').textContent = '❌ Error loading package: ' + error.message;
+                document.getElementById('errorMsg').textContent = error.message;
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        async function calculateTotal() {
+            const pickup = document.getElementById('pickupDate').value;
+            const dropoff = document.getElementById('dropoffDate').value;
+            const offerCode = document.getElementById('offerCode').value.trim();
+
+            if (!pickup || !dropoff || !packageData) {
+                document.getElementById('totalAmount').textContent = '$0.00';
+                document.getElementById('discountInfo').textContent = '';
+                return;
+            }
+
+            const days = Math.ceil((new Date(dropoff) - new Date(pickup)) / (1000 * 60 * 60 * 24));
+            if (days <= 0) {
+                document.getElementById('totalAmount').textContent = '$0.00';
+                document.getElementById('discountInfo').textContent = '⚠️ Dropoff must be after pickup';
+                return;
+            }
+
+            try {
+                const result = await calculatePrice(packageData.id, days, offerCode);
+                
+                document.getElementById('totalAmount').textContent = `$${result.totalPrice.toFixed(2)}`;
+                
+                let discountMsg = '';
+                if (result.packageDiscount > 0) {
+                    discountMsg += `📦 Package discount: ${result.packageDiscount}% `;
+                }
+                if (result.offerDiscount > 0) {
+                    discountMsg += `🎫 Offer discount: $${result.offerDiscount.toFixed(2)} `;
+                }
+                if (!discountMsg) {
+                    discountMsg = 'No discounts applied';
+                }
+                document.getElementById('discountInfo').textContent = discountMsg;
+
+            } catch (error) {
+                document.getElementById('totalAmount').textContent = 'Error';
+                document.getElementById('discountInfo').textContent = error.message;
+            }
+        }
+
+        async function bookPackage() {
+            const pickup = document.getElementById('pickupDate').value;
+            const dropoff = document.getElementById('dropoffDate').value;
+            const offerCode = document.getElementById('offerCode').value.trim();
+
+            if (!pickup || !dropoff) {
+                alert('Please select both pickup and dropoff dates');
+                return;
+            }
+
+            const days = Math.ceil((new Date(dropoff) - new Date(pickup)) / (1000 * 60 * 60 * 24));
+            if (days <= 0) {
+                alert('Dropoff date must be after pickup date');
+                return;
+            }
+
+            try {
+                // First, create the booking with the car
+                const booking = await createBooking(currentCarId, pickup, dropoff);
+                
+                // If offer code is provided, apply it
+                if (offerCode) {
+                    try {
+                        await applyOffer(booking.bookingId, offerCode);
+                    } catch (offerError) {
+                        // Offer might be invalid, but booking is still created
+                        console.warn('Offer not applied:', offerError.message);
+                    }
+                }
+
+                alert(`✅ Booking successful!\nBooking ID: ${booking.bookingId}\nTotal: $${booking.total_price}`);
+                window.location.href = '/dashboard';
+
+            } catch (error) {
+                alert('❌ Error creating booking: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

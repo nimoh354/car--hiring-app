@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Driver Login - CarHire</title>
+    <link rel="stylesheet" href="/css/driver-login.css">
+</head>
+<body>
+    <div class="driver-login-container">
+        <div class="login-box">
+            <div class="logo">
+                🚗 CarHire
+                <span>Driver Portal</span>
+            </div>
+            
+            <h2>👨‍✈️ Driver Login</h2>
+            <p class="subtitle">Access your driver dashboard</p>
+            
+            <div id="errorMsg" class="error-msg"></div>
+            
+            <form id="driverLoginForm">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="driver@carhire.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">🔑 Login to Driver Portal</button>
+            </form>
+            
+            <div class="register-link">
+                Not a driver yet? <a href="/driver-register">Register here</a>
+            </div>
+            
+            <div class="back-link">
+                <a href="/">← Back to Main Site</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔍 Driver Login Page Loaded');
+            
+            const form = document.getElementById('driverLoginForm');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Check if already logged in
+            const user = getCurrentUser();
+            console.log('🔍 Current user:', user);
+            
+            if (user) {
+                if (user.role === 'driver') {
+                    console.log('✅ Already logged in as driver, redirecting...');
+                    window.location.href = '/driver-portal';
+                    return;
+                } else if (user.role === 'admin') {
+                    console.log('✅ Already logged in as admin, redirecting...');
+                    window.location.href = '/admin';
+                    return;
+                }
+            }
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                console.log('🔍 Login form submitted');
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                console.log('🔍 Email:', email);
+                console.log('🔍 Password length:', password.length);
+
+                // Hide previous error
+                errorMsg.style.display = 'none';
+                errorMsg.textContent = '';
+
+                try {
+                    console.log('📡 Calling login API...');
+                    const data = await loginUser(email, password);
+                    console.log('✅ Login API response:', data);
+                    
+                    if (data && data.user) {
+                        console.log('👤 User role:', data.user.role);
+                        
+                        if (data.user.role === 'driver') {
+                            console.log('✅ Driver logged in, redirecting to driver portal...');
+                            window.location.href = '/driver-portal';
+                        } else if (data.user.role === 'admin') {
+                            console.log('✅ Admin logged in, redirecting to admin panel...');
+                            window.location.href = '/admin';
+                        } else {
+                            errorMsg.textContent = '❌ You are not registered as a driver.';
+                            errorMsg.style.display = 'block';
+                            logoutUser();
+                        }
+                    } else {
+                        errorMsg.textContent = '❌ Login failed. Please try again.';
+                        errorMsg.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('❌ Login error:', error);
+                    errorMsg.textContent = '❌ ' + (error.message || 'Login failed. Please try again.');
+                    errorMsg.style.display = 'block';
+                }
+            };
+        });
+    </script>
+</body>
+</html>

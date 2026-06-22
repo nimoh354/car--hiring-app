@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 Admin Panel - CarHire</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <style>
+        /* ============================================
+           ADMIN PANEL - COMPLETE STYLES
+           ============================================ */
+
+        :root {
+            --black: #0a0a0a;
+            --dark: #1a1a1a;
+            --dark-card: #222222;
+            --gold: #FFD700;
+            --gold-dark: #C9A800;
+            --gold-light: #FFE44D;
+            --gold-glow: rgba(255, 215, 0, 0.3);
+            --white: #FFFFFF;
+            --gray: #B8B8B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--black);
+            color: var(--white);
+        }
+
+        /* Header */
+        header {
+            background: var(--dark);
+            padding: 1rem 5%;
+            border-bottom: 2px solid var(--gold);
+            box-shadow: 0 2px 20px rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .logo span {
+            color: var(--white);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--gold);
+        }
+
+        /* Admin Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .admin-container h1 {
+            color: var(--gold);
+            margin-bottom: 2rem;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions h1 {
+            margin-bottom: 0;
+        }
+
+        .header-actions .actions-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Stats */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .stat-card h3 {
+            color: var(--gray);
+            font-size: 0.8rem;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--gold);
+            margin-top: 0.3rem;
+        }
+
+        /* Sections */
+        .admin-section {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h2 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        /* Refresh Button */
+        .btn-refresh {
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-refresh:hover {
+            background: var(--gold-dark);
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: scale(1.02);
+        }
+
+        .btn-refresh:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-refresh .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .toast {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 500;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            border-left: 4px solid;
+        }
+
+        .toast-success {
+            background: rgba(107, 203, 119, 0.15);
+            border-left-color: #6bcb77;
+            color: #6bcb77;
+        }
+
+        .toast-error {
+            background: rgba(255, 107, 107, 0.15);
+            border-left-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .toast-info {
+            background: rgba(77, 150, 255, 0.15);
+            border-left-color: #4d96ff;
+            color: #4d96ff;
+        }
+
+        .toast-warning {
+            background: rgba(255, 215, 0, 0.15);
+            border-left-color: #FFD700;
+            color: #FFD700;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            background: var(--black);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .chart-container h3 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-container canvas {
+            max-height: 200px;
+            max-width: 100%;
+        }
+
+        /* Revenue Cards */
+        .revenue-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .revenue-card {
+            background: var(--black);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .revenue-card:hover {
+            border-color: var(--gold);
+        }
+
+        .revenue-card h4 {
+            color: var(--gray);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: normal;
+        }
+
+        .revenue-card p {
+            color: var(--gold);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.3rem;
+        }
+
+        .revenue-card .green {
+            color: #6bcb77;
+        }
+
+        .revenue-card .red {
+            color: #ff6b6b;
+        }
+
+        /* Buttons */
+        .btn-add {
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-add:hover {
+            background: var(--gold-dark);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .btn-edit {
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit:hover {
+            background: var(--gold-dark);
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .btn-delete:hover {
+            background: #ee5a24;
+        }
+
+        .btn-assign {
+            background: #4d96ff;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-assign:hover {
+            background: #3a7ad9;
+        }
+
+        .btn-confirm {
+            background: #6bcb77;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm:hover {
+            background: #4aad57;
+        }
+
+        .btn-cancel-admin {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel-admin:hover {
+            background: #ee5a24;
+        }
+
+        /* Car Form */
+        .car-form {
+            background: var(--black);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            display: none;
+        }
+
+        .car-form h3 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .car-form form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .car-form input,
+        .car-form select {
+            padding: 0.6rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            background: var(--dark);
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .car-form input:focus,
+        .car-form select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .car-form button {
+            padding: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .car-form button[type="submit"] {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .car-form button[type="submit"]:hover {
+            background: var(--gold-dark);
+        }
+
+        .car-form button[type="button"] {
+            background: var(--dark);
+            color: var(--gray);
+        }
+
+        /* Lists */
+        .car-card-admin {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .car-card-admin:last-child {
+            border-bottom: none;
+        }
+
+        .car-card-admin .car-info {
+            flex: 1;
+        }
+
+        .car-card-admin .car-info h4 {
+            color: var(--gold);
+        }
+
+        .car-card-admin .car-info p {
+            color: var(--gray);
+            font-size: 0.8rem;
+            margin: 0.2rem 0;
+        }
+
+        .car-card-admin .car-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+
+        .booking-item .booking-info {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .booking-item .booking-info strong {
+            color: var(--gold);
+        }
+
+        .booking-item .booking-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select.driver-select {
+            padding: 0.2rem 0.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 5px;
+            background: var(--dark);
+            color: var(--white);
+            font-size: 0.8rem;
+        }
+
+        .status {
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .status.pending { background: rgba(255, 215, 0, 0.2); color: var(--gold); }
+        .status.confirmed { background: rgba(107, 203, 119, 0.2); color: #6bcb77; }
+        .status.assigned { background: rgba(77, 150, 255, 0.2); color: #4d96ff; }
+        .status.cancelled { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        .status.completed { background: rgba(255,255,255,0.1); color: var(--gray); }
+
+        .driver-assigned { color: #4d96ff; font-weight: bold; }
+        .no-data { text-align: center; padding: 1.5rem; color: var(--gray); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+            .admin-stats { grid-template-columns: 1fr 1fr; }
+            .revenue-summary { grid-template-columns: 1fr 1fr; }
+            .car-form form { grid-template-columns: 1fr; }
+            .header-actions { flex-direction: column; gap: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .admin-stats { grid-template-columns: 1fr; }
+            .revenue-summary { grid-template-columns: 1fr; }
+            .admin-container { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <header>
+        <nav>
+            <div class="logo">👑 Admin<span>Panel</span></div>
+            <ul>
+                <li><a href="/">🏠 Home</a></li>
+                <li><a href="#" id="logoutBtn">🚪 Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <!-- Header with Refresh Button -->
+        <div class="header-actions">
+            <h1>📊 Admin Dashboard</h1>
+            <div class="actions-right">
+                <button id="refreshAllBtn" class="btn-refresh" onclick="refreshAll()">
+                    🔄 <span id="refreshText">Refresh All</span>
+                </button>
+                <span id="lastUpdated" style="color: var(--gray); font-size: 0.8rem;"></span>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3>🚗 Total Cars</h3>
+                <p id="totalCars">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Total Bookings</h3>
+                <p id="totalBookings">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>👥 Total Users</h3>
+                <p id="totalUsers">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>⏳ Pending Bookings</h3>
+                <p id="pendingBookings">0</p>
+            </div>
+        </div>
+
+        <!-- Revenue Summary -->
+        <div class="admin-section">
+            <div class="section-header">
+                <h2>💰 Revenue Overview</h2>
+                <button class="btn-refresh" onclick="refreshAnalytics()">🔄 Refresh Charts</button>
+            </div>
+            <div class="revenue-summary">
+                <div class="revenue-card">
+                    <h4>Total Revenue</h4>
+                    <p id="totalRevenue">$0</p>
+                </div>
+                <div class="revenue-card">
+                    <h4>This Month</h4>
+                    <p id="monthRevenue" class="green">$0</p>
+                </div>
+                <div class="revenue-card">
+                    <h4>This Week</h4>
+                    <p id="weekRevenue" class="green">$0</p>
+                </div>
+                <div class="revenue-card">
+                    <h4>Avg per Booking</h4>
+                    <p id="avgBooking">$0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Charts -->
+        <div class="admin-section">
+            <h2>📈 Analytics</h2>
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h3>📅 Bookings by Month</h3>
+                    <canvas id="bookingsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>💰 Revenue by Month</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>🚗 Most Popular Cars</h3>
+                    <canvas id="popularCarsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>📊 Booking Status</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Cars -->
+        <div class="admin-section">
+            <div class="section-header">
+                <h2>🚗 Manage Cars</h2>
+                <button class="btn-refresh" onclick="refreshCars()">🔄 Refresh Cars</button>
+            </div>
+            <button onclick="showAddCarForm()" class="btn-add">+ Add New Car</button>
+            
+            <div id="addCarForm" class="car-form">
+                <h3>📝 Add New Car</h3>
+                <form id="carForm">
+                    <input type="text" id="brand" placeholder="Brand" required>
+                    <input type="text" id="model" placeholder="Model" required>
+                    <input type="number" id="year" placeholder="Year" required>
+                    <input type="text" id="license_plate" placeholder="License Plate" required>
+                    <input type="number" id="price_per_day" placeholder="Price per day" required>
+                    <select id="fuel_type">
+                        <option value="Petrol">⛽ Petrol</option>
+                        <option value="Diesel">⛽ Diesel</option>
+                        <option value="Electric">🔋 Electric</option>
+                        <option value="Hybrid">🔋 Hybrid</option>
+                    </select>
+                    <select id="transmission">
+                        <option value="Manual">⚙️ Manual</option>
+                        <option value="Automatic">⚙️ Automatic</option>
+                    </select>
+                    <input type="number" id="seats" placeholder="Seats" required>
+                    <input type="text" id="image_url" placeholder="Image URL">
+                    <button type="submit">✅ Add Car</button>
+                    <button type="button" onclick="hideAddCarForm()">❌ Cancel</button>
+                </form>
+            </div>
+
+            <div id="carsList">
+                <div class="no-data">Loading cars...</div>
+            </div>
+        </div>
+
+        <!-- All Bookings -->
+        <div class="admin-section">
+            <div class="section-header">
+                <h2>📅 All Bookings</h2>
+                <button class="btn-refresh" onclick="refreshBookings()">🔄 Refresh Bookings</button>
+            </div>
+            <div id="bookingsList">
+                <div class="no-data">Loading bookings...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

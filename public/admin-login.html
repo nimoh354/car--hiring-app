@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 Admin Login - CarHire</title>
+    <link rel="stylesheet" href="/css/admin-login.css">
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="login-box">
+            <div class="logo">
+                👑 CarHire
+                <span>Admin Panel</span>
+            </div>
+            
+            <h2>🔐 Admin Login</h2>
+            <p class="subtitle">Access the admin dashboard</p>
+            
+            <div id="errorMsg" class="error-msg"></div>
+            
+            <form id="adminLoginForm">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="admin@carhire.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">👑 Login to Admin Panel</button>
+            </form>
+            
+            <div class="back-link">
+                <a href="/">← Back to Main Site</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('adminLoginForm');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // If already logged in as admin, redirect to admin panel
+            const user = getCurrentUser();
+            if (user && user.role === 'admin') {
+                window.location.href = '/admin';
+                return;
+            }
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    const data = await loginUser(email, password);
+                    if (data.user && data.user.role === 'admin') {
+                        window.location.href = '/admin';
+                    } else {
+                        errorMsg.textContent = '❌ You are not authorized as admin.';
+                        errorMsg.style.display = 'block';
+                        logoutUser();
+                    }
+                } catch (error) {
+                    errorMsg.textContent = '❌ ' + error.message;
+                    errorMsg.style.display = 'block';
+                }
+            };
+        });
+    </script>
+</body>
+</html>
